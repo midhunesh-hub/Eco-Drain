@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Drain Map</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <span class="eyebrow">Network Map</span>
+        <h1>EcoDrain Network</h1>
+        <p>Every installed unit, color-coded by current waste level.</p>
+    </div>
+
+    <div class="map-legend">
+        <div class="item"><span class="swatch" style="background:#02c39a"></span> Normal (0–50%)</div>
+        <div class="item"><span class="swatch" style="background:#e8871e"></span> Warning (51–75%)</div>
+        <div class="item"><span class="swatch" style="background:#d14545"></span> Critical (76–90%)</div>
+        <div class="item"><span class="swatch" style="background:#a8123a"></span> Immediate Action (91–100%)</div>
+    </div>
+
+    <div id="map"></div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+</body>
+</html>

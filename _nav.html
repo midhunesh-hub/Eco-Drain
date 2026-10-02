@@ -1,0 +1,18 @@
+<nav class="navbar">
+    <div class="nav-inner">
+        <a href="/" class="logo">🌱 EcoDrain</a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="{{ 'active' if active=='home' else '' }}">Home</a>
+            <a href="/dashboard" class="{{ 'active' if active=='dashboard' else '' }}">Dashboard</a>
+            <a href="/map" class="{{ 'active' if active=='map' else '' }}">Drain Map</a>
+            <a href="/alerts" class="{{ 'active' if active=='alerts' else '' }}">Alerts</a>
+            <a href="/analytics" class="{{ 'active' if active=='analytics' else '' }}">Analytics</a>
+            <a href="/maintenance" class="{{ 'active' if active=='maintenance' else '' }}">Maintenance</a>
+        </div>
+    </div>
+</nav>

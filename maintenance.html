@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Maintenance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <span class="eyebrow">Operations</span>
+        <h1>🧹 Maintenance Center</h1>
+        <p>Prioritized cleaning list and cleaning history log.</p>
+    </div>
+
+    <div class="panel">
+        <h2>Priority Queue <small>Sorted by waste level, highest first</small></h2>
+        <div style="overflow-x:auto;">
+            <table class="data-table" id="priorityTable">
+                <thead>
+                    <tr><th>Drain</th><th>Location</th><th>Waste Level</th><th>Priority</th><th>Recommended Action</th></tr>
+                </thead>
+                <tbody id="priorityBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Record a Cleaning</h2>
+        <form id="maintenanceForm">
+            <div class="form-grid">
+                <div class="field">
+                    <label>Drain</label>
+                    <select id="drainId" required></select>
+                </div>
+                <div class="field">
+                    <label>Assigned To</label>
+                    <input id="assignedTo" placeholder="Maintenance Team" value="Maintenance Team">
+                </div>
+                <div class="field">
+                    <label>Before Cleaning (%)</label>
+                    <input id="beforeLevel" type="number" min="0" max="100" required>
+                </div>
+                <div class="field">
+                    <label>After Cleaning (%)</label>
+                    <input id="afterLevel" type="number" min="0" max="100" required value="10">
+                </div>
+            </div>
+            <div class="field" style="margin-bottom:16px;">
+                <label>Remarks</label>
+                <textarea id="remarks" placeholder="Trap emptied, drain flushed..."></textarea>
+            </div>
+            <button class="btn" type="submit">Record Cleaning</button>
+            <p class="form-message" id="formMessage"></p>
+        </form>
+    </div>
+
+    <div class="panel">
+        <h2>Cleaning History</h2>
+        <div style="overflow-x:auto;">
+            <table class="data-table">
+                <thead>
+                    <tr><th>Drain</th><th>Before</th><th>After</th><th>Assigned To</th><th>Date</th><th>Remarks</th></tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/maintenance.js') }}"></script>
+</body>
+</html>

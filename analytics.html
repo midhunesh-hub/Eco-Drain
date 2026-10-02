@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Analytics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <span class="eyebrow">Insights</span>
+        <h1>📈 EcoDrain Analytics</h1>
+        <p>Network-wide statistics and per-drain historical trends.</p>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Total Drains</h3><div class="kpi-icon">🌍</div></div>
+            <div class="kpi-value" id="totalDrains">--</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Avg. Waste Level</h3><div class="kpi-icon">💧</div></div>
+            <div class="kpi-value" id="averageWaste">--</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Critical Drains</h3><div class="kpi-icon">🚨</div></div>
+            <div class="kpi-value text-critical" id="critical">--</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Total Alerts</h3><div class="kpi-icon">🔔</div></div>
+            <div class="kpi-value text-warning" id="totalAlerts">--</div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Waste Level by Drain <small>Snapshot of every drain right now</small></h2>
+        <canvas id="analyticsBarChart" height="110"></canvas>
+    </div>
+
+    <div class="panel">
+        <h2>
+            Waste-Level History <small>Trend for a selected drain, plus a simple predictive estimate</small>
+        </h2>
+        <select id="historyDrainSelect" style="margin-bottom:16px; padding:9px 12px; border-radius:8px; border:1.5px solid var(--border);"></select>
+        <canvas id="historyLineChart" height="110"></canvas>
+        <p class="sim-note" id="predictionText" style="margin-top:14px;"></p>
+    </div>
+
+    <div class="panel">
+        <h2>Network Summary</h2>
+        <table class="data-table">
+            <tbody>
+                <tr><td>Average Drain Health</td><td id="rowHealth">--</td></tr>
+                <tr><td>Active Alerts</td><td id="rowActiveAlerts">--</td></tr>
+                <tr><td>Total Maintenance Operations</td><td id="rowMaintenance">--</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+</body>
+</html>

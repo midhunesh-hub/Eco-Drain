@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <span class="eyebrow">Live Monitoring</span>
+        <h1>EcoDrain Monitoring Center</h1>
+        <p>Real-time status of every drain in the network.</p>
+    </div>
+
+    <div class="dash-status-bar">
+        <div class="status-live"><span class="pulse-dot"></span> ALL SYSTEMS OPERATIONAL</div>
+        <small>Last updated: <span id="lastUpdated">--</span> · refreshes every 5s</small>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Average Waste Level</h3><div class="kpi-icon">💧</div></div>
+            <div class="kpi-value" id="kpiAvgWaste">--%</div>
+            <div class="kpi-sub">Across all active drains</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Critical Drains</h3><div class="kpi-icon">🚨</div></div>
+            <div class="kpi-value text-critical" id="kpiCritical">--</div>
+            <div class="kpi-sub">Waste level above 75%</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Active Alerts</h3><div class="kpi-icon">🔔</div></div>
+            <div class="kpi-value text-warning" id="kpiAlerts">--</div>
+            <div class="kpi-sub">Awaiting maintenance</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-top"><h3>Avg. Drain Health</h3><div class="kpi-icon">❤️</div></div>
+            <div class="kpi-value text-normal" id="kpiHealth">--</div>
+            <div class="kpi-sub">out of 100</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- LEFT COLUMN -->
+        <div>
+            <div class="panel">
+                <h2>Waste Level Gauge <small>Select a drain to inspect it closely</small></h2>
+                <div class="gauge-wrap">
+                    <div class="gauge" id="gaugeCircle">
+                        <div class="gauge-inner">
+                            <div class="pct" id="gaugePct">--%</div>
+                            <div class="lbl" id="gaugeStatus">NORMAL</div>
+                        </div>
+                    </div>
+                    <div>
+                        <select id="gaugeDrainSelect" class="field" style="margin-bottom:12px; padding:8px 10px; border-radius:8px; border:1.5px solid var(--border);"></select>
+                        <div class="gauge-legend">
+                            <div class="row"><span class="dot" style="background:var(--accent)"></span> 0–50% Normal</div>
+                            <div class="row"><span class="dot" style="background:var(--warn)"></span> 51–75% Warning</div>
+                            <div class="row"><span class="dot" style="background:var(--danger)"></span> 76–100% Critical</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="console-box" id="consoleReadout">⚠ ECODRAIN ALERT &nbsp; Waste Level: --% &nbsp; Status: -- &nbsp; Action: --</div>
+            </div>
+
+            <div class="panel">
+                <h2>Waste Level by Drain <small>Live bar chart, refreshes automatically</small></h2>
+                <canvas id="wasteChart" height="140"></canvas>
+            </div>
+
+            <div class="panel">
+                <h2>🎮 Live Demo Simulator <small>No ESP32 handy? Push a test reading straight into the pipeline.</small></h2>
+                <div class="sim-row">
+                    <div class="sim-field">
+                        <label>Drain</label>
+                        <select id="simDrain" class="field" style="padding:11px 13px; border-radius:8px; border:1.5px solid var(--border);"></select>
+                    </div>
+                    <div class="sim-field">
+                        <label>Water Flow</label>
+                        <select id="simFlow" style="padding:11px 13px; border-radius:8px; border:1.5px solid var(--border);">
+                            <option value="NORMAL">NORMAL</option>
+                            <option value="LOW">LOW</option>
+                            <option value="BLOCKED">BLOCKED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sim-field" style="margin-bottom:14px;">
+                    <label>Waste Level: <span class="sim-slider-value" id="simValue">50%</span></label>
+                    <input type="range" id="simSlider" min="0" max="100" value="50">
+                </div>
+                <button class="btn" id="simSend">Send Reading</button>
+                <p class="sim-note" id="simMessage"></p>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+            <div class="panel">
+                <h2>Drain Network <small id="drainCount">-- drains</small></h2>
+                <div id="drainList"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Recent Alerts</h2>
+                <div id="recentAlerts"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

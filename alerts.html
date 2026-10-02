@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Alerts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <span class="eyebrow">Alert Center</span>
+        <h1>🚨 Drainage Alerts</h1>
+        <p>Every alert raised automatically by the smart-status engine.</p>
+    </div>
+
+    <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="critical">Critical</button>
+        <button class="filter-btn" data-filter="warning">Warning</button>
+        <button class="filter-btn" data-filter="resolved">Resolved</button>
+    </div>
+
+    <div id="alertList"></div>
+</main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+</body>
+</html>

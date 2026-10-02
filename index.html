@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoDrain | Smart Drainage Monitoring</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+{% include "_nav.html" %}
+
+<section class="hero">
+    <div class="hero-content">
+        <span class="eyebrow" style="color:#8fd8ce;">BCA Idea Sprint · Project Model</span>
+        <h1>Smart Drainage.<br><span>Cleaner Cities.</span></h1>
+        <p>
+            EcoDrain combines a physical waste-trapping drain model with an
+            IoT sensor, a Flask + SQLite backend, and this live dashboard —
+            so blocked drains get caught and cleaned before they cause a flood.
+        </p>
+        <div class="hero-buttons">
+            <a href="/dashboard" class="btn">View Live Dashboard</a>
+            <a href="#how" class="btn secondary">How It Works</a>
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="drain-card">
+            <div class="layer">🛣️ &nbsp; Road</div>
+            <div class="layer">🕳️ &nbsp; Drain</div>
+            <div class="layer">🗑️ &nbsp; Waste Trap</div>
+            <div class="layer">💧 &nbsp; Water Outlet</div>
+            <div class="status-pill"><span class="pulse-dot"></span> SYSTEM ONLINE</div>
+        </div>
+    </div>
+</section>
+
+<section class="stats-strip">
+    <div class="stat-card"><div class="num" id="statDrains">--</div><div class="label">Active Drains</div></div>
+    <div class="stat-card"><div class="num" id="statAvg">--</div><div class="label">Avg. Waste Level</div></div>
+    <div class="stat-card"><div class="num" id="statAlerts">--</div><div class="label">Active Alerts</div></div>
+    <div class="stat-card"><div class="num">24/7</div><div class="label">Smart Monitoring</div></div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <span class="eyebrow">Why EcoDrain</span>
+        <h2>Plastic Waste → Blocked Drain → Waterlogging</h2>
+        <p>EcoDrain intercepts waste at the source and continuously monitors drainage conditions using IoT, so cleaning happens before a blockage — not after.</p>
+    </div>
+
+    <div class="flow-row">
+        <span class="flow-chip">🌧️ Rainfall</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-chip">🗑️ Waste Trapped</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-chip">📡 Sensor Reads Level</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-chip">🔔 Alert Raised</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-chip">🧹 Drain Cleaned</span>
+    </div>
+</section>
+
+<section class="section" id="how">
+    <div class="section-head">
+        <span class="eyebrow">How It Works</span>
+        <h2>Four Simple Stages</h2>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-num">01</div>
+            <h3>Catch</h3>
+            <p>A removable mesh trap intercepts plastic and leaves before they enter the drainage channel.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">02</div>
+            <h3>Sense</h3>
+            <p>An ultrasonic sensor on the ESP32 measures the trap's fill level in real time.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">03</div>
+            <h3>Alert</h3>
+            <p>Flask automatically classifies the reading and raises an alert when cleaning is required.</p>
+        </div>
+        <div class="step-card">
+            <div class="step-num">04</div>
+            <h3>Act</h3>
+            <p>Maintenance staff clean the trap and log it — the dashboard returns to normal instantly.</p>
+        </div>
+    </div>
+</section>
+
+<footer class="site-footer">
+    <h3>EcoDrain</h3>
+    <p>"Stop Waste. Keep Drains Flowing. Protect Our Cities."</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    async function loadHomeStats() {
+        try {
+            const [analytics] = await Promise.all([
+                fetch("/api/analytics").then(r => r.json())
+            ]);
+            document.getElementById("statDrains").innerText = analytics.total_drains;
+            document.getElementById("statAvg").innerText = analytics.average_waste + "%";
+            document.getElementById("statAlerts").innerText = analytics.active_alerts;
+        } catch (e) {
+            console.error("Could not load stats", e);
+        }
+    }
+    loadHomeStats();
+</script>
+</body>
+</html>
