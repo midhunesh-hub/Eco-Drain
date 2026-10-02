@@ -1,122 +1,95 @@
-# 🌱 EcoDrain — Smart Drainage Monitoring System
+# EcoDrain — Arduino Uno (USB, no WiFi)
 
-A full-stack IoT-ready web app for the EcoDrain project: Flask + SQLite backend,
-a live dashboard, drain map, alerts, analytics and maintenance workflow — plus a
-built-in **Live Demo Simulator** so you can show the whole pipeline working on
-stage even before your ESP32 hardware is wired up.
+Your Arduino has no WiFi, so it can't POST to the backend directly like the
+ESP32 does. Instead:
 
-## 1. Run it (VS Code / terminal)
+```
+HC-SR04 sensor -> Arduino Uno -> USB cable -> serial_bridge.py -> Flask backend
+```
+
+The Arduino just prints one line of text per reading over USB serial. A
+small Python script on your computer reads that text and forwards it to
+the same `/api/sensor-data` endpoint the ESP32 uses — so the backend logic
+is identical either way.
+
+## 1. Wire it up
+
+Arduino Uno logic is 5V, same as the HC-SR04, so **no voltage divider is
+needed here** (unlike the ESP32 version).
+
+```
+HC-SR04                Arduino Uno
+-------                -----------
+VCC       ---------->  5V
+GND       ---------->  GND
+TRIG      ---------->  Digital Pin 9
+ECHO      ---------->  Digital Pin 10
+
+Float switch            Arduino Uno
+------------            -----------
+Signal    ---------->   Digital Pin 7   (optional)
+GND       ---------->   GND
+```
+
+No float switch? Leave pin 7 unconnected — flow will just always report
+`NORMAL`.
+
+## 2. Upload the sketch
+
+Open `uno_usb_serial.ino` in the Arduino IDE. Edit near the top:
+
+```cpp
+const char* DRAIN_ID = "ED-001";       // must match a drain already in the backend
+const float EMPTY_DISTANCE_CM = 20.0;  // calibrate for your mounting
+const float FULL_DISTANCE_CM  = 2.0;
+```
+
+Select `Tools > Board > Arduino Uno` (or whichever board you have) and the
+correct `Tools > Port`, then Upload.
+
+**After uploading, close the Serial Monitor window if it's open** — only
+one program can read the serial port at a time, and the bridge script
+needs it.
+
+## 3. Install and run the bridge script
+
+In a terminal, on the same computer running `app.py`:
 
 ```bash
-cd ecodrain_webapp
-
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-
+cd arduino/uno_usb_serial
 pip install -r requirements.txt
-python app.py
+
+# find your Arduino's port if you don't already know it:
+python serial_bridge.py --list-ports
+
+# then run the bridge (replace COM3 / /dev/ttyUSB0 with your actual port):
+python serial_bridge.py --port COM3
 ```
 
-Open **http://127.0.0.1:5000** in your browser. `ecodrain.db` (SQLite) is created
-automatically on first run, pre-seeded with 5 demo drains at different waste
-levels so every page already looks "alive."
+You should see it print each line the Arduino sends, followed by
+`-> POST 200: {...}` confirming the backend accepted it. Leave this
+terminal running — it needs to stay open the whole time you want the
+sensor feeding the dashboard.
 
-To start completely fresh, just delete `ecodrain.db` and run `python app.py` again.
+## 4. Check the dashboard
 
-## 2. Pages
+With `python app.py` running in one terminal and `serial_bridge.py`
+running in another, open `/dashboard` or `/map` in your browser. The
+matching drain (`ED-001` by default) should update every 5 seconds
+without touching the Live Demo Simulator.
 
-| Route | What it shows |
-|---|---|
-| `/` | Landing page with live stat strip |
-| `/dashboard` | Gauge, live bar chart, drain list, recent alerts, **Live Demo Simulator** |
-| `/map` | Leaflet map, color-coded markers per drain status |
-| `/alerts` | Filterable alert feed with Resolve action |
-| `/analytics` | Network KPIs, per-drain history chart, simple predictive-maintenance estimate |
-| `/maintenance` | Priority queue + cleaning log form + history table |
+## Troubleshooting
 
-## 3. Live demo without hardware
-
-On `/dashboard`, use **🎮 Live Demo Simulator**: pick a drain, drag the waste-level
-slider, hit **Send Reading**. It calls the same `/api/sensor-data`-style pipeline
-your ESP32 will use, so you can demonstrate the full story —
-`reading → status change → alert → map color → analytics` — live, on stage,
-with just a mouse.
-
-## 4. Connecting the real ESP32
-
-Point your ESP32 sketch's `POST` requests at:
-
-```
-http://YOUR_COMPUTER_IP:5000/api/sensor-data
-```
-
-with a JSON body:
-
-```json
-{ "drain_id": "ED-001", "distance": 8.2, "waste_level": 80, "water_flow": "NORMAL" }
-```
-
-Find `YOUR_COMPUTER_IP` with `ipconfig` (Windows) or `ifconfig`/`ip a` (macOS/Linux),
-and make sure your ESP32 and laptop are on the **same Wi-Fi network**.
-
-Remember: an HC-SR04's ECHO pin outputs 5V — use a voltage divider before wiring
-it into an ESP32 GPIO (which expects 3.3V).
-
-**Ready-to-flash firmware:** see `arduino/esp32_drain_sensor/esp32_drain_sensor.ino`
-and `arduino/README.md` for the full wiring diagram, calibration steps, and
-setup instructions — just fill in your WiFi credentials, computer's IP, and
-drain ID, then upload.
-
-## 5. Project structure
-
-```
-ecodrain_webapp/
-├── app.py                  ← Flask backend + REST API + SQLite
-├── requirements.txt
-├── templates/
-│   ├── _nav.html           ← shared navbar (included on every page)
-│   ├── index.html
-│   ├── dashboard.html
-│   ├── map.html
-│   ├── alerts.html
-│   ├── analytics.html
-│   └── maintenance.html
-└── static/
-    ├── css/style.css       ← full design system (colors, cards, gauge, forms...)
-    └── js/
-        ├── main.js         ← shared: mobile nav toggle, status helpers
-        ├── dashboard.js
-        ├── map.js
-        ├── alerts.js
-        ├── analytics.js
-        └── maintenance.js
-```
-
-## 6. Fixes made to the original draft
-
-- Every reading above 75% no longer inserts a **new** alert row — it only creates
-  one if there isn't already an active alert of the same severity, so the Alerts
-  page doesn't get spammed by a live sensor.
-- Waste levels dropping back under 75% now **auto-resolve** the active alert.
-- `waste_level` sent to `/api/sensor-data` is now clamped to 0–100 and validated
-  as numeric before use (bad ESP32 payloads no longer 500-error the server).
-- `/api/maintenance` now also accepts `GET` (used by the history table) in
-  addition to `POST`.
-- Added `/api/drains/<id>/history` and `/api/drains/<id>/prediction` so
-  Analytics has real per-drain trend + predictive-maintenance data instead of
-  only current snapshots.
-- Added `/api/simulate` — the Live Demo Simulator's endpoint — so you're not
-  dependent on the ESP32 being present to demonstrate the system end-to-end.
-- Demo data is now seeded with 5 drains at varied levels (including one already
-  in "IMMEDIATE ACTION") plus 24 hours of synthetic history, so the dashboard,
-  map and analytics pages look complete the moment you open them.
-
-## 7. Where to go next (Version 2 ideas)
-
-- Admin login before `/maintenance` and `/api/maintenance`
-- Browser push notifications on new CRITICAL/IMMEDIATE alerts
-- Swap SQLite for MySQL (the queries are plain SQL, so this is a small change)
-- Rainfall/weather API integration to estimate flood risk, not just trap fill level
+- **"could not open port" / "Access is denied"** — the Arduino IDE's
+  Serial Monitor (or another program) is holding the port open. Close it
+  and try again.
+- **Bridge runs but no `POST` lines appear** — the Arduino is printing
+  something that doesn't match the expected `DRAIN:...,DIST:...,LEVEL:...,FLOW:...`
+  format. Check the raw `Arduino: ...` lines being printed for typos or
+  garbled serial output (usually a baud rate mismatch — both the sketch
+  and `--baud` must be 9600).
+- **`POST` shows a 404** — `DRAIN_ID` in the sketch doesn't match an
+  existing drain (`ED-001`..`ED-005` by default, case-sensitive).
+- **Garbled/random characters** — baud rate mismatch, or a loose USB
+  connection. Double-check `Serial.begin(9600)` in the sketch matches
+  `--baud 9600` on the bridge script.
